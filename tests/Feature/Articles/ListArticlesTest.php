@@ -14,10 +14,25 @@ class ListArticlesTest extends TestCase
     /** @test */
     public function can_fetch_a_single_article(): void
     {
-       $article = Article::factory()->create();
+        $this->withoutExceptionHandling();
 
-       $response = $this->getJson('/api/v1/articles/'. $article->getRouteKey());
+        $article = Article::factory()->create();
 
-       $response->assertSee($article->title);
+        $response = $this->getJson(route('api.v1.articles.show', $article));
+
+        $response->assertExactJson([
+            'data' => [
+                'type' => 'articles',
+                'id' => (string) $article->getRouteKey(),
+                'attributes' => [
+                    'title' => $article->title,
+                    'slug' => $article->slug,
+                    'content' => $article->content,
+                ],
+                'links' => [
+                    'self' => route('api.v1.articles.show', $article)
+                ]
+            ]
+        ]);
     }
 }
